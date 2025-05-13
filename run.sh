@@ -7,4 +7,3 @@ main() {
     (cd /root/Reality-SNI-finder && bash /root/Reality-SNI-finder/venv.sh)
     (cd /root/Reality-SNI-finder && python3 main.py)
 }
-main
