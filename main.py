@@ -28,7 +28,11 @@ for j in result:
     avg_value_list.append(avg_value)
 
 # Create a dictionary with the domain names as keys and the avg values as values
-domain_ping_dict = {sni_list[i]: float(avg_value_list[i]) for i in range(len(sni_list))}
+domain_ping_dict = {
+    sni_list[i]: float(avg_value_list[i])
+    for i in range(min(len(sni_list), len(avg_value_list)))
+}
+
 
 # Sort the dictionary by the values in ascending order
 sorted_dict = dict(sorted(domain_ping_dict.items(), key=lambda item: item[1]))
