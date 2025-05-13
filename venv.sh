@@ -3,3 +3,4 @@ source sni/bin/activate
 cd /root/Reality-SNI-finder
 pip install pandas
 pip install tabulate
+python3 main.py
