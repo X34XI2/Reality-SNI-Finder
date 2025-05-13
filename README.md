@@ -12,7 +12,9 @@ wget -N https://raw.githubusercontent.com/X34XI2/Reality-SNI-finder/main/run.sh 
 python3 -m venv venv             
 source venv/bin/activate          
 pip install -r requirements.txt 
-python3 main.py ``` 
+python3 main.py 
+```
+
 
 <img width="423" alt="image" src="https://github.com/meower1/Reality-SNI-finder/assets/109747197/56d3720d-f5ed-49d5-b985-d001f1d9f85b">
 
