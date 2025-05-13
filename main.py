@@ -1,44 +1,43 @@
-from subprocess import check_output, run, CalledProcessError
+from subprocess import check_output, CalledProcessError
 from re import findall
 from pandas import DataFrame
 from tabulate import tabulate
+from os import system
 
-# Read the sni.txt file and split it into a list of domain names
+# Читаем список доменов из файла
 with open("sni.txt", "r") as my_file:
-    data = my_file.read()
-    sni_list = data.split("\n")
+    sni_list = list(filter(None, my_file.read().split("\n")))
 
-# Remove any empty strings from the sni_list
-sni_list = list(filter(None, sni_list))
-
-# Test all the domains in sni.txt file and put the results in a list called result
-result = []
-try:
-    for i in sni_list:
-        x = check_output(f"./tlsping {i}:443", shell=True).rstrip().decode('utf-8')
-        result.append(x)
-except CalledProcessError:
-    pass
-
-# Extract all the avg tlsping values from the domains
+# Списки для успешных доменов и их пингов
+successful_domains = []
 avg_value_list = []
-for j in result:
-    # Use regular expressions to extract the "avg" value
-    avg_value = findall(r"avg/.*?ms.*?(\d+\.?\d*)ms", j )[0]
-    avg_value_list.append(avg_value)
 
-# Create a dictionary with the domain names as keys and the avg values as values
-domain_ping_dict = {
-    sni_list[i]: float(avg_value_list[i])
-    for i in range(min(len(sni_list), len(avg_value_list)))
-}
+for domain in sni_list:
+    try:
+        output = check_output(f"./tlsping {domain}:443", shell=True, stderr=None).decode('utf-8').rstrip()
+        # Ищем avg значение пинга
+        avg_value = findall(r"avg/.*?ms.*?(\d+\.?\d*)ms", output)
+        if avg_value:
+            avg_value_list.append(float(avg_value[0]))
+            successful_domains.append(domain)
+        else:
+            print(f"[Warning] Не удалось найти avg пинг для домена: {domain}")
+    except CalledProcessError:
+        print(f"[Error] Не удалось подключиться к домену: {domain}")
+    except Exception as e:
+        print(f"[Error] Ошибка при обработке домена {domain}: {e}")
 
+if not successful_domains:
+    print("Нет успешных результатов для обработки.")
+    exit(1)
 
-# Sort the dictionary by the values in ascending order
+# Создаем словарь домен -> пинг
+domain_ping_dict = dict(zip(successful_domains, avg_value_list))
+
+# Сортируем словарь по пингу
 sorted_dict = dict(sorted(domain_ping_dict.items(), key=lambda item: item[1]))
 
-# Convert the sorted dictionary to a pandas DataFrame and print it using tabulate
-df = DataFrame(sorted_dict.items(), columns=['domains', 'pings(ms)'])
-run('clear')
-print(tabulate(df, headers='keys', tablefmt='psql'))
-
+# Выводим таблицу
+df = DataFrame(sorted_dict.items(), columns=['Domain', 'Ping (ms)'])
+system('clear')
+print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
