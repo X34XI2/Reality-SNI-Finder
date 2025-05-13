@@ -6,3 +6,5 @@ pip install tabulate
 source sni/bin/activate
 cd /root/Reality-SNI-finder
 python3 main.py
+deactivate
+cd
